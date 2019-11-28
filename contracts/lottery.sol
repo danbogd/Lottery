@@ -166,6 +166,8 @@ contract CourseLottery is Ownable{
 
     // Event for lottery reset
     event ResetLottery();
+    
+    event ChangeAddressOfLotteryOwner (address indexed previousLotteryOwner, address indexed newLotteryOwner);
 
     //---------Modifiers---------------
 
@@ -215,9 +217,10 @@ contract CourseLottery is Ownable{
 
 
     // change the lottery owner account
-    function NewAccountOwner(address payable _addressLotteryOwner) public onlyOwner {
+    function NewAccountOfLotteryOwner(address payable _addressLotteryOwner) public onlyOwner {
         require (_addressLotteryOwner != address(0), "New lottery owner is the zero address");      
         addressLotteryOwner = _addressLotteryOwner;
+        emit ChangeAddressOfLotteryOwner(addressLotteryOwner, _addressLotteryOwner);
         
     }  
    
@@ -254,4 +257,4 @@ contract CourseLottery is Ownable{
     function getBalance() public view returns (uint) {
         return address(this).balance;
     }
-}
+}s
