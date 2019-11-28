@@ -199,15 +199,15 @@ contract CourseLottery is Ownable{
     // Award users tickets for eth, 1 finney = 1 ticket
     function buyTickets() payable public lotteryOngoing returns (bool success) {
         ticketHolders[msg.sender] = msg.value / (10**15);
-        ticketsIssued += ticketHolders[msg.sender];
+        ticketsIssued = ticketsIssued.add(ticketHolders[msg.sender]);
         holders.push(msg.sender);
-        contractBalance += msg.value;
+        contractBalance = contractBalance.add(msg.value);
         emit TicketsBought(msg.sender, ticketHolders[msg.sender]);
         return true;
     }
 
     // After winners have been declared and awarded, clear the arrays and reset the balances
-    function resetLottery() public lotteryFinished returns (bool success) {
+    function resetLottery() internal lotteryFinished returns (bool success) {
         lotteryEnded = false;
         lotteryStart = now;
         lotteryDuration = 24 hours;
@@ -257,4 +257,4 @@ contract CourseLottery is Ownable{
     function getBalance() public view returns (uint) {
         return address(this).balance;
     }
-}s
+}
