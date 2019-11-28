@@ -1,4 +1,6 @@
-pragma solidity ^0.5.0;
+pragma solidity >= 0.5.0 < 0.6.0;
+
+import "./Random.sol";
 
 library SafeMath {
     
@@ -115,7 +117,7 @@ contract Ownable {
     }
 }
 
-contract CourseLottery is Ownable{
+contract CourseLottery is Ownable, Random {
     
     using SafeMath for uint256;
     
@@ -156,6 +158,9 @@ contract CourseLottery is Ownable{
 
     // Total Eth that has been won from users using the contract
     uint public totalEthWon;
+    
+    // Flag geted random number
+    bool public rand;
 
     //----------Events---------------
     // Event for when tickets are bought
@@ -198,6 +203,7 @@ contract CourseLottery is Ownable{
     }
     // Award users tickets for eth, 1 finney = 1 ticket
     function buyTickets() payable public lotteryOngoing returns (bool success) {
+        rand = false;
         ticketHolders[msg.sender] = msg.value / (10**15);
         ticketsIssued = ticketsIssued.add(ticketHolders[msg.sender]);
         holders.push(msg.sender);
@@ -238,12 +244,26 @@ contract CourseLottery is Ownable{
         resetLottery();
         return true;
     }
+    
+   
+    
+    // Get random from oraclize
+    function GetRandomNumber() public lotteryFinished {
+     update();
+     rand = true;
+     
+    }
+    
+    
 
     //Generate the winners by random using tickets bought as weight
     function generateWinners() public lotteryFinished returns (uint winningTicket) {
 
         //Need to make this truly random - This is temp solution for testing
-        uint randNum = uint(blockhash(block.number - 1)) % ticketsIssued + 1;
+        //uint randNum = uint(blockhash(block.number - 1)) % ticketsIssued + 1;
+        
+        require (rand);
+        uint256 randNum = random;
         winner = holders[randNum];
         prevWinners.push(winner);
         awardWinnings(winner);
