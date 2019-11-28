@@ -117,6 +117,8 @@ contract Ownable {
 
 contract CourseLottery is Ownable{
     
+    using SafeMath for uint256;
+    
     struct TicketHolder {
         address _holderAddress;
         uint _numTickets;
@@ -139,6 +141,9 @@ contract CourseLottery is Ownable{
 
     // Total balance of the smart contract
     uint public contractBalance;
+
+    // address of lotery owner
+    address payable public addressLotteryOwner = 0x65D069D418E7d56bFc2C1d6D78c5dAd8A32D1882;
 
     // When the lottery started
     uint public lotteryStart;
@@ -208,9 +213,23 @@ contract CourseLottery is Ownable{
         return true;
     }
 
-    // This will distribute the correct winnings to each winner
+
+    // change the lottery owner account
+    function NewAccountOwner(address payable _addressLotteryOwner) public onlyOwner {
+        require (_addressLotteryOwner != address(0), "New lottery owner is the zero address");      
+        addressLotteryOwner = _addressLotteryOwner;
+        
+    }  
+   
+    
+     // This will distribute the correct winnings to each winner
     function awardWinnings(address payable _winner) internal lotteryOngoing returns (bool success) {
+        uint256 winner_part_value = contractBalance.mul(99).div(100);
+        uint256 amount = contractBalance.sub(winner_part_value);
+        
+        addressLotteryOwner.transfer(amount); 
         _winner.transfer(contractBalance);
+        
         emit AwardWinnings(_winner, contractBalance);
         contractBalance = 0;
         resetLottery();
