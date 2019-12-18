@@ -1,6 +1,6 @@
 pragma solidity >= 0.5.0 < 0.6.0;
 
-import "./Random.sol";
+
 
 library SafeMath {
     
@@ -52,72 +52,10 @@ library SafeMath {
 }
 
 
-contract Ownable {
-    address private _owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    /**
-     * @dev Initializes the contract setting the deployer as the initial owner.
-     */
-    constructor () internal {
-        _owner = msg.sender;
-        emit OwnershipTransferred(address(0), _owner);
-    }
+contract Lottery  {
 
-    /**
-     * @dev Returns the address of the current owner.
-     */
-    function owner() public view returns (address) {
-        return _owner;
-    }
-
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        require(isOwner(), "Ownable: caller is not the owner");
-        _;
-    }
-
-    /**
-     * @dev Returns true if the caller is the current owner.
-     */
-    function isOwner() public view returns (bool) {
-        return msg.sender == _owner;
-    }
-
-    /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
-     *
-     * > Note: Renouncing ownership will leave the contract without an owner,
-     * thereby removing any functionality that is only available to the owner.
-     */
-    function renounceOwnership() public onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address newOwner) public onlyOwner {
-        _transferOwnership(newOwner);
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     */
-    function _transferOwnership(address newOwner) internal {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
-}
-
-contract CourseLottery is Ownable, Random {
     
     using SafeMath for uint256;
     
@@ -202,7 +140,8 @@ contract CourseLottery is Ownable, Random {
         buyTickets();
     }
     // Award users tickets for eth, 1 finney = 1 ticket
-    function buyTickets() payable public lotteryOngoing returns (bool success) {
+    function buyTickets() payable public  returns (bool success) {// TODO lotteryOngoing
+        require (msg.value >= 1 finney, 'require minimum 1 finney');
         rand = false;
         ticketHolders[msg.sender] = msg.value / (10**15);
         ticketsIssued = ticketsIssued.add(ticketHolders[msg.sender]);
@@ -223,7 +162,7 @@ contract CourseLottery is Ownable, Random {
 
 
     // change the lottery owner account
-    function NewAccountOfLotteryOwner(address payable _addressLotteryOwner) public onlyOwner {
+    function NewAccountOfLotteryOwner(address payable _addressLotteryOwner) public  { // TODO OwnlyOwner
         require (_addressLotteryOwner != address(0), "New lottery owner is the zero address");      
         addressLotteryOwner = _addressLotteryOwner;
         emit ChangeAddressOfLotteryOwner(addressLotteryOwner, _addressLotteryOwner);
@@ -245,16 +184,15 @@ contract CourseLottery is Ownable, Random {
         return true;
     }
     
-   
     
     // Get random from oraclize
     function GetRandomNumber() public lotteryFinished {
-     update();
+     //update();
      rand = true;
      
     }
     
-    
+    uint public random;
 
     //Generate the winners by random using tickets bought as weight
     function generateWinners() public lotteryFinished returns (uint winningTicket) {
@@ -277,4 +215,6 @@ contract CourseLottery is Ownable, Random {
     function getBalance() public view returns (uint) {
         return address(this).balance;
     }
+
+    
 }
